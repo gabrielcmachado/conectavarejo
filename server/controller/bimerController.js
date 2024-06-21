@@ -11,12 +11,12 @@ export const bimerController = async (req, res) => {
             data: req.body
         };
         const resposta = await instanceBimer(options);
-        res.json({resposta:resposta.data, tokenBimer:req.headers.Authorization});
+        res.json({ resposta: resposta.data, tokenBimer: req.headers.Authorization });
     } catch (error) {
-        if (error.response.data){
-        res.status(400).json(error.response.data)
-        } else{
-            res.json(error)
-        };
+        if (error.response.data) {
+            res.status(400).json(error.response.data);
+        } else {
+            res.json(error);
+        }
     }
 };

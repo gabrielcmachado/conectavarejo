@@ -19,11 +19,10 @@ const Orcamento = Sequelize_base.define('Orcamento', {
         type: DataTypes.BOOLEAN,
         defaultValue: false
     },
-    dadosEmpresa:{
+    dadosEmpresa: {
         type: DataTypes.JSON,
         allowNull: false
     }
-
 });
 
 // Modelo para a tabela Produto

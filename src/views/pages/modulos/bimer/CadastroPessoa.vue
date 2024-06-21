@@ -45,13 +45,13 @@ const showMessage = (severity, summary, detail) => {
 };
 
 const verificarCadastro = async () => {
-    if (localStorage.getItem('bimer_token')){
-        instanceLocalServer.defaults.headers.Authorization = localStorage.getItem('bimer_token')
+    if (localStorage.getItem('bimer_token')) {
+        instanceLocalServer.defaults.headers.Authorization = localStorage.getItem('bimer_token');
     }
 
     try {
         const response = await instanceLocalServer.get(`bimer/api/pessoas?cpfCnpj=${cpf.value.replace(/\D/g, '')}`);
-        localStorage.setItem('bimer_token', response.data.tokenBimer.split(' ')[1])
+        localStorage.setItem('bimer_token', response.data.tokenBimer.split(' ')[1]);
         showMessageTime('info', 'Aguarde', 'Localizando Aguarde', 1500);
         if (response.data.resposta.ListaObjetos) {
             showMessageTime('info', 'Pessoa já Cadastrada', `A pessoa ${response.data.resposta.ListaObjetos[0].Nome} já está cadastrada com o código: ${response.data.resposta.ListaObjetos[0].Codigo}`, 5000);
@@ -197,15 +197,12 @@ watchEffect(() => {
                 <div class="field col-12 md:col-6">
                     <div class="p-inputgroup">
                         <span class="p-float-label">
-                            <InputMask v-model="cpf" aria-describedby="statusCPF" id="cpf" @keyup="validarCPF"
-                                mask="999.999.999-99" required />
+                            <InputMask v-model="cpf" aria-describedby="statusCPF" id="cpf" @keyup="validarCPF" mask="999.999.999-99" required />
                             <label for="cpf">CPF</label>
                         </span>
                         <span class="p-buttonset">
-                            <Button v-if="cpfInvalido" disabled icon="pi pi-check" type="button"
-                                @click="verificarCadastro" label="Verificar" />
-                            <Button v-else icon="pi pi-check" type="button" @click="verificarCadastro"
-                                label="Verificar" />
+                            <Button v-if="cpfInvalido" disabled icon="pi pi-check" type="button" @click="verificarCadastro" label="Verificar" />
+                            <Button v-else icon="pi pi-check" type="button" @click="verificarCadastro" label="Verificar" />
                         </span>
                     </div>
                 </div>
@@ -240,14 +237,12 @@ watchEffect(() => {
                             <i class="pi pi-heart-fill"></i>
                         </span>
                         <span class="p-float-label">
-                            <Select v-model="nomeVendedor" id="nomeVendedor" optionLabel="name"
-                                :options="nomeVendedores" placeholder="Selecione um vendedor" required></Select>
+                            <Select v-model="nomeVendedor" id="nomeVendedor" optionLabel="name" :options="nomeVendedores" placeholder="Selecione um vendedor" required></Select>
                         </span>
                     </div>
                 </div>
                 <div class="field col-12 md:col-12">
-                    <Button :disabled="!formIsValid" type="submit"
-                        class="btn btn-success justify-content-center">Enviar</Button>
+                    <Button :disabled="!formIsValid" type="submit" class="btn btn-success justify-content-center">Enviar</Button>
                 </div>
             </form>
         </div>

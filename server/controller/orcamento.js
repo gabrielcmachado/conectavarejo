@@ -6,7 +6,7 @@ export const criarOrcamento = async (req, res) => {
     try {
         // Extraia as informações do corpo da requisição
         const { nome, telefone, produtos, vendedor, geroupedido, dadosEmpresa } = req.body;
-        console.log (dadosEmpresa)
+        console.log(dadosEmpresa);
         // Crie um novo orçamento no banco de dados
         const novoOrcamento = await Orcamento.create({
             nome,

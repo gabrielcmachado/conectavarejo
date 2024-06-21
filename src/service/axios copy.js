@@ -21,7 +21,7 @@ const getNewToken = async () => {
         throw error;
     }
 };
-         
+
 const requestHandler = async (config) => {
     if (!oldToken) {
         oldToken = await getNewToken();

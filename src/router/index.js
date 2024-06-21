@@ -17,7 +17,7 @@ const router = createRouter({
                 {
                     path: 'painel/bimer',
                     name: 'Bimer',
-                    meta: {requiresAuth: true},
+                    meta: { requiresAuth: true },
                     children: [
                         {
                             path: '/painel/bimer/cadastro-pessoa',
@@ -30,7 +30,7 @@ const router = createRouter({
                             component: () => import('@/views/pages/modulos/bimer/OrcamentoRapido.vue')
                         }
                     ]
-                },
+                }
             ]
         },
         {

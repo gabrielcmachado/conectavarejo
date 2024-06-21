@@ -35,5 +35,4 @@ const newLogin = async (req, res) => {
         });
 };
 
-
-export { newLogin }
+export { newLogin };

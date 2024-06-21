@@ -131,9 +131,9 @@ const fetchOperacaoBimer = async () => {
 
         operacoesBimer.value = operacoesEncontradas.value.map(
             (operacaoBimer) =>
-            ({
-                value: `${operacaoBimer.codigo} - ${operacaoBimer.nome.trim()}`
-            }.value)
+                ({
+                    value: `${operacaoBimer.codigo} - ${operacaoBimer.nome.trim()}`
+                }.value)
         );
     } catch (error) {
         console.error('Erro ao buscar Operações:', error);
@@ -170,9 +170,9 @@ const fetchEmpresas = async (val) => {
         }));
         empresas.value = empresasEncontradas.value.map(
             (empresa) =>
-            ({
-                value: `${empresa.codigo} - ${empresa.nome.trim()}`
-            }.value)
+                ({
+                    value: `${empresa.codigo} - ${empresa.nome.trim()}`
+                }.value)
         );
     } catch (error) {
         console.error('Erro ao buscar Empresas:', error);
@@ -211,9 +211,9 @@ const fetchPrecosBimer = async () => {
         }));
         precosBimer.value = precosEncontrados.value.map(
             (precoBimer) =>
-            ({
-                value: `${precoBimer.codigo} - ${precoBimer.nome.trim()}`
-            }.value)
+                ({
+                    value: `${precoBimer.codigo} - ${precoBimer.nome.trim()}`
+                }.value)
         );
     } catch (error) {
         console.error('Erro ao buscar Preços:', error);
@@ -256,9 +256,9 @@ const fetchSetoresBimer = async () => {
             }));
             setoresBimer.value = setoresEncontrados.value.map(
                 (setorBimer) =>
-                ({
-                    value: `${setorBimer.codigo} - ${setorBimer.nome.trim()}`
-                }.value)
+                    ({
+                        value: `${setorBimer.codigo} - ${setorBimer.nome.trim()}`
+                    }.value)
             );
         } catch (error) {
             console.error('Erro ao buscar Setores:', error);
@@ -291,9 +291,9 @@ const fetchProdutos = async (val) => {
         const produto = await instanceLocalServer.get(`bimer/${rota}?query=${val.query}&idempresa=${dadosEmpresa.value.empresa.codigo}&idpreco=${dadosEmpresa.value.precos.identificador}&idsetor=${dadosEmpresa.value.setor.identificador}`);
         sugestoesProdutos.value = produto.data.produtos.map(
             (produto) =>
-            ({
-                value: `${produto.codigo.trim()} | ${produto.nome} | R$ ${produto.preco}`
-            }.value)
+                ({
+                    value: `${produto.codigo.trim()} | ${produto.nome} | R$ ${produto.preco}`
+                }.value)
         );
 
         produtosEncontrados.value = produto.data.produtos.map((produto) => ({
@@ -413,7 +413,7 @@ const gerarLayoutImpressao = () => {
             </thead>
             <tbody>
               ${orcamentoSelecionado.value.ProdutosOrcamentos.map(
-        (produto) => `
+                  (produto) => `
                   <tr>
                     <td>${produto.codigo}</td>
                     <td>${produto.nome}</td>
@@ -422,7 +422,7 @@ const gerarLayoutImpressao = () => {
                     <td>${formatCurrency(produto.valorTotal)}</td>
                   </tr>
                 `
-    ).join('')}
+              ).join('')}
             </tbody>
           </table>
         </div>
@@ -564,9 +564,9 @@ const reenviarOrcamento = async (orcamento, type) => {
 };
 
 const gerarPedidoDeVenda = async (orcamento) => {
-    console.log(orcamento)
-    const cliente = await instanceLocalServer.get(`bimer/consulta-cliente-telefone?query=${orcamento.telefone}`)
-    console.log(cliente)
+    console.log(orcamento);
+    const cliente = await instanceLocalServer.get(`bimer/consulta-cliente-telefone?query=${orcamento.telefone}`);
+    console.log(cliente);
 
     dialogConversaoVisible.value = true;
 };
@@ -587,18 +587,15 @@ fetchOrcamentos();
                     <div class="flex flex-wrap">
                         <div class="field col-12 md:col-6">
                             <label for="idempresa">Empresa</label>
-                            <AutoComplete id="idempresa" v-model="idempresa" dropdown :suggestions="empresas"
-                                @complete="fetchEmpresas" @item-select="processaInfosEmpresa($event)" />
+                            <AutoComplete id="idempresa" v-model="idempresa" dropdown :suggestions="empresas" @complete="fetchEmpresas" @item-select="processaInfosEmpresa($event)" />
                         </div>
                         <div class="field col-12 md:col-3">
                             <label for="idPrecoBimer">Tabela de Preço</label>
-                            <AutoComplete id="idPrecoBimer" v-model="idPrecoBimer" dropdown :suggestions="precosBimer"
-                                @complete="fetchPrecosBimer" @item-select="processaInfosPrecos($event)" />
+                            <AutoComplete id="idPrecoBimer" v-model="idPrecoBimer" dropdown :suggestions="precosBimer" @complete="fetchPrecosBimer" @item-select="processaInfosPrecos($event)" />
                         </div>
                         <div class="field col-12 md:col-3">
                             <label for="idSetorBimer">Setor</label>
-                            <AutoComplete id="idSetorBimer" v-model="idSetorBimer" dropdown :suggestions="setoresBimer"
-                                @complete="fetchSetoresBimer" @item-select="processaInfosSetores($event)" />
+                            <AutoComplete id="idSetorBimer" v-model="idSetorBimer" dropdown :suggestions="setoresBimer" @complete="fetchSetoresBimer" @item-select="processaInfosSetores($event)" />
                         </div>
                     </div>
                     <div class="flex flex-wrap">
@@ -631,9 +628,7 @@ fetchOrcamentos();
                                     <i class="pi pi-heart-fill"></i>
                                 </span>
                                 <span class="p-float-label">
-                                    <Select v-model="vendedor" id="vendedor" optionLabel="name"
-                                        :options="nomeVendedores" placeholder="Selecione um vendedor " required>
-                                    </Select>
+                                    <Select v-model="vendedor" id="vendedor" optionLabel="name" :options="nomeVendedores" placeholder="Selecione um vendedor " required> </Select>
                                 </span>
                             </div>
                         </div>
@@ -649,43 +644,46 @@ fetchOrcamentos();
                         <SelectButton v-model="opcaoEnvioSelecionada" :options="opcoesEnvio" optionLabel="name" />
                     </div>
                 </div>
-                <div v-for="(produto, index) in produtos" :key="index" class="field col-12 md:col-12 mt-3"
-                    style="padding-top: 1px; padding-bottom: 1px">
+                <div v-for="(produto, index) in produtos" :key="index" class="field col-12 md:col-12 mt-3" style="padding-top: 1px; padding-bottom: 1px">
                     <div class="p-inputgroup">
                         <span class="p-inputgroup-addon">
                             <i class="pi pi-box"></i>
                         </span>
                         <label class="p-inputgroup-addon">cod: <br />{{ produtos[index].codigo }}</label>
-                        <label class="p-inputgroup-addon">Vl.Uni: <br />
-                            R$ {{ produtos[index].valorUnitario }}</label>
-                        <AutoComplete style="width: 45%" v-model="produtos[index].produto" @loading="true"
-                            @complete="fetchProdutos" :suggestions="sugestoesProdutos"
-                            placeholder="Digite para buscar produtos" :id="'produto-' + index"
-                            @item-select="preencherInfos($event, index)" />
-                        <InputNumber style="width: 5%" v-model="produtos[index].quantidade" mode="decimal"
-                            @update:modelValue="calcularTotalItem(index)" />
-                        <label class="p-inputgroup-addon">Vl.Total: <br />
-                            R$ {{ produtos[index].valorTotal }}</label>
+                        <label class="p-inputgroup-addon"
+                            >Vl.Uni: <br />
+                            R$ {{ produtos[index].valorUnitario }}</label
+                        >
+                        <AutoComplete
+                            style="width: 45%"
+                            v-model="produtos[index].produto"
+                            @loading="true"
+                            @complete="fetchProdutos"
+                            :suggestions="sugestoesProdutos"
+                            placeholder="Digite para buscar produtos"
+                            :id="'produto-' + index"
+                            @item-select="preencherInfos($event, index)"
+                        />
+                        <InputNumber style="width: 5%" v-model="produtos[index].quantidade" mode="decimal" @update:modelValue="calcularTotalItem(index)" />
+                        <label class="p-inputgroup-addon"
+                            >Vl.Total: <br />
+                            R$ {{ produtos[index].valorTotal }}</label
+                        >
                         <span class="p-buttonset">
-                            <Button type="button" @click="adicionarProduto" icon="pi pi-plus-circle"
-                                class="p-button-success"></Button>
-                            <Button v-if="produtos.length > 1" type="button" @click="removerProduto(index)"
-                                icon="pi pi-trash" class="p-button-danger"></Button>
-                            <Button v-if="produtos.length === 1" type="button" @click="removerProduto(index)"
-                                icon="pi pi-trash" class="p-button-danger" disabled></Button>
+                            <Button type="button" @click="adicionarProduto" icon="pi pi-plus-circle" class="p-button-success"></Button>
+                            <Button v-if="produtos.length > 1" type="button" @click="removerProduto(index)" icon="pi pi-trash" class="p-button-danger"></Button>
+                            <Button v-if="produtos.length === 1" type="button" @click="removerProduto(index)" icon="pi pi-trash" class="p-button-danger" disabled></Button>
                         </span>
                     </div>
                 </div>
                 <div class="field col-12 md:col-12">
                     <label>Total Orcamento: R$ {{ totalOrcamento }}</label>
-                    <Button type="submit" class="justify-content-center" :disabled="!submitButtonOrcStatus">Enviar
-                        Orçamento</Button>
+                    <Button type="submit" class="justify-content-center" :disabled="!submitButtonOrcStatus">Enviar Orçamento</Button>
                 </div>
             </form>
         </div>
         <div class="mt-4">
-            <DataTable :value="orcamentos" :paginator="true" :rows="10" :filters="filters" v-model:filters="filters"
-                sortField="id" :sortOrder="-1" filterDisplay="menu">
+            <DataTable :value="orcamentos" :paginator="true" :rows="10" :filters="filters" v-model:filters="filters" sortField="id" :sortOrder="-1" filterDisplay="menu">
                 <Column field="id" header="Codigo"></Column>
                 <Column field="nome" header="Cliente"></Column>
                 <Column field="telefone" header="Telefone"></Column>
@@ -700,13 +698,11 @@ fetchOrcamentos();
                 </Column>
                 <Column header="Ações">
                     <template #body="slotProps">
-                        <SplitButton icon="pi pi-eye" dropdownIcon="pi pi-cog"
-                            @click="abrirOverlayPanel(slotProps.data)" :model="optionsMenuActions(slotProps.data)" />
+                        <SplitButton icon="pi pi-eye" dropdownIcon="pi pi-cog" @click="abrirOverlayPanel(slotProps.data)" :model="optionsMenuActions(slotProps.data)" />
                     </template>
                 </Column>
             </DataTable>
         </div>
-
     </div>
 
     <!-- chama dialog Detalhes de Orçamento -->
@@ -714,12 +710,10 @@ fetchOrcamentos();
     <Dialog v-model:visible="dialogVisible" header="Detalhes do Orçamento" modal>
         <div>
             <p>
-                <strong>Empresa:</strong> {{ orcamentoSelecionado.dadosEmpresa.empresa.nome }} <br /><strong>Tabela de
-                    Preço:</strong> {{ orcamentoSelecionado.dadosEmpresa.precos.nome }} <br /><Strong>Setor:</Strong>
+                <strong>Empresa:</strong> {{ orcamentoSelecionado.dadosEmpresa.empresa.nome }} <br /><strong>Tabela de Preço:</strong> {{ orcamentoSelecionado.dadosEmpresa.precos.nome }} <br /><Strong>Setor:</Strong>
                 {{ orcamentoSelecionado.dadosEmpresa.setor.nome }}
             </p>
-            <p><strong>Nome:</strong> {{ orcamentoSelecionado.nome }} <strong> - Telefone:</strong> {{
-                orcamentoSelecionado.telefone }} <Strong> - Vendedor:</Strong> {{ orcamentoSelecionado.vendedor }}</p>
+            <p><strong>Nome:</strong> {{ orcamentoSelecionado.nome }} <strong> - Telefone:</strong> {{ orcamentoSelecionado.telefone }} <Strong> - Vendedor:</Strong> {{ orcamentoSelecionado.vendedor }}</p>
 
             <DataTable :value="orcamentoSelecionado.ProdutosOrcamentos" :paginator="true" :rows="10">
                 <Column field="codigo" header="Codigo"></Column>
@@ -740,23 +734,20 @@ fetchOrcamentos();
     </Dialog>
 
     <!-- chama dialog Converter em pedido de venda -->
-    <Dialog v-model:visible="dialogConversaoVisible" modal
-        header="Gerar Pedido/Pré-pedido | Empresa: {orcamentoSelecionado.dadosEmpresa.empresa.nome}" class="m-5">
-        <div class="p-fluid mt-0" style="margin-top:-20px!important">
+    <Dialog v-model:visible="dialogConversaoVisible" modal header="Gerar Pedido/Pré-pedido | Empresa: {orcamentoSelecionado.dadosEmpresa.empresa.nome}" class="m-5">
+        <div class="p-fluid mt-0" style="margin-top: -20px !important">
             <form @submit.prevent="submitForm" class="flex flex-wrap">
                 <div class="flex flex-wrap col-12 md:col-12 mt-0">
                     <div class="field col-12 md:col-6">
                         <label for="idCliente">Cliente</label>
                         <div class="flex">
-                        <AutoComplete id="idCliente" v-model="idCliente" dropdown :suggestions="cliente"
-                            @complete="fetchCliente" @item-select="processaInfosCliente($event)"/>
-                        <Button icon="pi pi-star" class="p-button-sucess" />
+                            <AutoComplete id="idCliente" v-model="idCliente" dropdown :suggestions="cliente" @complete="fetchCliente" @item-select="processaInfosCliente($event)" />
+                            <Button icon="pi pi-star" class="p-button-sucess" />
                         </div>
                     </div>
                     <div class="field col-12 md:col-6">
                         <label for="idOperacaoBimerVendas">Operação</label>
-                        <AutoComplete id="idOperacaoBimerVendas" v-model="idOperacaoBimerVendas" dropdown :suggestions="operacoesBimer"
-                            @complete="fetchPrecosBimer" @item-select="processaInfosPrecos($event)" />
+                        <AutoComplete id="idOperacaoBimerVendas" v-model="idOperacaoBimerVendas" dropdown :suggestions="operacoesBimer" @complete="fetchPrecosBimer" @item-select="processaInfosPrecos($event)" />
                     </div>
                 </div>
                 <!-- <div class="col-12 md:col-12 flex flex-wrap" style="margin-top:-20px!important">
@@ -835,17 +826,14 @@ fetchOrcamentos();
                 </div> -->
             </form>
         </div>
-        <div>
-
-        </div>
+        <div></div>
     </Dialog>
 
     <!-- chama dialog Enviar Mensagem Whatsapp -->
     <ConfirmDialog group="headless">
         <template #container="{ message, acceptCallback, rejectCallback }">
             <div class="flex flex-column align-items-center p-5 surface-overlay border-round">
-                <div
-                    class="border-circle bg-primary inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
+                <div class="border-circle bg-primary inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
                     <i class="pi pi-question text-5xl"></i>
                 </div>
                 <span class="font-bold text-2xl block mb-2 mt-4">{{ message.header }}</span>

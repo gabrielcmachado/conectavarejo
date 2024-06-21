@@ -2,7 +2,7 @@
 /* eslint-disable no-undef */
 'use strict';
 
-const { v4:uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require('uuid');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
             [
                 {
                     email: 'gabriel@beng.digital',
-                    UUID:uuidv4(),
+                    UUID: uuidv4(),
                     password: '08Gmhc89*#@',
                     roleId: 0,
                     status: true,

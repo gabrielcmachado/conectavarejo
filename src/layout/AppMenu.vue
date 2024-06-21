@@ -21,7 +21,8 @@ const model = ref([
                         to: '/painel/bimer/orcamento-rapido'
                     }
                 ]
-            }]
+            }
+        ]
     },
     {
         label: 'Configurações',
@@ -35,7 +36,8 @@ const model = ref([
                         to: '/painel/bimer/cadastro-pessoa'
                     }
                 ]
-            }]
+            }
+        ]
     }
 
     // {

@@ -10,7 +10,8 @@ const newAccount = async (req, res) => {
     const transaction = await Sequelize_base.transaction();
     try {
         const account = await Account.create(
-            {   nome: req.body.nome,
+            {
+                nome: req.body.nome,
                 endereco: req.body.endereco,
                 cidade: req.body.cidade,
                 cep: req.body.cep,
@@ -51,7 +52,7 @@ const newAccount = async (req, res) => {
             user: firstUser
         });
     } catch (err) {
-        await transaction.rollback()
+        await transaction.rollback();
         console.error(err);
         return res.status(500).json({
             message: 'Erro ao criar conta',

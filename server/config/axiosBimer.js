@@ -1,13 +1,10 @@
 import axios from 'axios';
 
 const instanceBimer = axios.create({
-    baseURL: 'https://server.vagalumedobrasil.com.br',
+    baseURL: 'https://server.vagalumedobrasil.com.br'
 });
 
 // let oldToken;
-
-
-
 
 // const getNewToken = async () => {
 //     try {
@@ -19,7 +16,7 @@ const instanceBimer = axios.create({
 //         throw error;
 //     }
 // };
-         
+
 // const requestHandler = async (config) => {
 //     if (!oldToken) {
 //         oldToken = await getNewToken();

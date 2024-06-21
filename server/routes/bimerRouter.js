@@ -22,5 +22,4 @@ router.post('/orcamento', criarOrcamento);
 router.get('/orcamento', obterTodosOrcamentos);
 router.get('/orcamento/:orcamentoId', obterOrcamentoPorID);
 
-
 export default router;

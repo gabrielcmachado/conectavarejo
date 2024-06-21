@@ -3,14 +3,13 @@ import qs from 'qs';
 
 export const verifyToken = async (req, res, next) => {
     let token = req.headers['authorization'];
-        try {
-            token = await gerarToken();
-            req.headers.Authorization = "Bearer "+ token;
-            next();
-        } catch (err) {
-            return res.status(401).send({ message: err.message });
-        }
-
+    try {
+        token = await gerarToken();
+        req.headers.Authorization = 'Bearer ' + token;
+        next();
+    } catch (err) {
+        return res.status(401).send({ message: err.message });
+    }
 };
 const gerarToken = async () => {
     try {
