@@ -1,0 +1,7 @@
+{
+    "username": "root",
+    "password": "08Gmhc89*#@",
+    "database": "conecta_varejo_db",
+    "host": "localhost",
+    "dialect": "mysql"
+}
