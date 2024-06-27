@@ -26,10 +26,14 @@ const sugestoesProdutos = ref([]);
 const empresas = ref([]);
 const idempresa = ref('');
 const empresasEncontradas = ref([]);
+const pessoas = ref([]);
+const idpessoa = ref('');
+const pessoasEncontradas = ref([]);
 const idSetorBimer = ref('');
 const setoresBimer = ref('');
 const operacoesBimer = ref('');
 const idOperacaoBimer = ref('');
+const orcConvertPedido = ref([]);
 const operacoesEncontradas = ref([]);
 const setoresEncontrados = ref([]);
 const idPrecoBimer = ref('');
@@ -155,6 +159,51 @@ const processaInfosOperacao = (val) => {
     }
 };
 // FIM DE ROTINA AUTOCOMPLETE SETORES
+
+
+const fetchPessoas = async (val) => {
+    pessoas.value = ['localizando aguarde...'];
+
+    try {
+        const pessoa = await instanceLocalServer.get(`bimer/api/pessoas?cpfCnpj=${val.query}`);
+        pessoasEncontradas.value = pessoa.data.resposta.ListaObjetos.map((pessoa) => ({
+            codigo: `${pessoa.Codigo}`,
+            nome: `${pessoa.Nome.trim()}`,
+            cpf: `${pessoa.CpfCnpjCompleto}`
+        }));
+        pessoas.value = pessoasEncontradas.value.map(
+            (pessoa) =>
+                ({
+                    value: `${pessoa.cpf} - ${pessoa.nome.trim()}`
+                }.value)
+        );
+    } catch (error) {
+        console.error('Erro ao buscar Pessoa:', error);
+        return [];
+    }
+};
+
+const processaInfosPessoas = async(val) => {
+
+    try {
+        const resultado = pessoasEncontradas.value.find((e) => {
+            console.log(e)
+            return e.cpf.trim() === val.value.split('-')[0].trim(); // Adiciona o return para a comparação
+        });
+        if (resultado) {
+            const pessoa = await instanceLocalServer.get(`bimer/api/pessoas?cpfCnpj=${resultado}`);
+            orcConvertPedido.value.cliente = JSON.parse(JSON.stringify(pessoa));
+            console.log("rodou")
+            console.log(orcConvertPedido)
+        }
+    } catch (error) {
+        console.error('Erro ao buscar Pessoas', error);
+        return [];
+    }
+};
+
+// FIM DE ROTINA AUTOCOMPLETE EMPRESA
+
 
 // INICIO DE ROTINA AUTOCOMPLETE EMPRESA
 
@@ -304,7 +353,6 @@ const fetchProdutos = async (val) => {
             value: `${produto.codigo.trim()} | ${produto.nome} | R$ ${produto.preco}`
         }));
 
-        console.log(produto);
     } catch (error) {
         console.error('Erro ao buscar produtos:', error);
         return [];
@@ -564,10 +612,22 @@ const reenviarOrcamento = async (orcamento, type) => {
 };
 
 const gerarPedidoDeVenda = async (orcamento) => {
-    console.log(orcamento);
     const cliente = await instanceLocalServer.get(`bimer/consulta-cliente-telefone?query=${orcamento.telefone}`);
-    console.log(cliente);
+    const config = await instanceLocalServer.get('bimer/api/configuracoes?nomeSecao=Faturamento.Documento');
+    orcConvertPedido.value={
+        cliente: cliente.data.detalhesPessoa.ListaObjetos[0],
+        configuracao: config.data.resposta.ListaObjetos.filter((config)=>config.NomeConfiguracao == 'IdOperacaoNF')
+    }
 
+    idpessoa.value=`${orcConvertPedido.value.cliente.CpfCnpjCompleto} - ${orcConvertPedido.value.cliente.Nome}`
+    pessoasEncontradas.value=[{
+            codigo: `${orcConvertPedido.value.cliente.Codigo}`,
+            nome: `${orcConvertPedido.value.cliente.Nome.trim()}`,
+            cpf: `${orcConvertPedido.value.cliente.CpfCnpjCompleto}`}]
+    
+    processaInfosPessoas(idpessoa.value.toString())
+
+    console.log(JSON.stringify(orcConvertPedido.value));
     dialogConversaoVisible.value = true;
 };
 
@@ -739,10 +799,9 @@ fetchOrcamentos();
             <form @submit.prevent="submitForm" class="flex flex-wrap">
                 <div class="flex flex-wrap col-12 md:col-12 mt-0">
                     <div class="field col-12 md:col-6">
-                        <label for="idCliente">Cliente</label>
+                        <label for="idpessoa">Cliente</label>
                         <div class="flex">
-                            <AutoComplete id="idCliente" v-model="idCliente" dropdown :suggestions="cliente" @complete="fetchCliente" @item-select="processaInfosCliente($event)" />
-                            <Button icon="pi pi-star" class="p-button-sucess" />
+                            <AutoComplete id="idpessoa" v-model="idpessoa" :suggestions="pessoas" @complete="fetchPessoas" @item-select="processaInfosPessoas($event)" />
                         </div>
                     </div>
                     <div class="field col-12 md:col-6">

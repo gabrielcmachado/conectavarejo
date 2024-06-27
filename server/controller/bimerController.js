@@ -1,6 +1,6 @@
 import { instanceBimer } from '../config/axiosBimer.js';
 
-export const bimerController = async (req, res) => {
+export const byPassBimerController = async (req, res) => {
     try {
         const options = {
             method: req.method,
