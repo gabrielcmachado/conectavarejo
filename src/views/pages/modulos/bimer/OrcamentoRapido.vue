@@ -1,12 +1,12 @@
 <script setup>
 import { ref, watchEffect, onBeforeMount } from 'vue';
-import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
+import { FilterMatchMode, FilterOperator } from 'primevue/api';
 import { instanceLocalServer, blankInstance } from '../../../../service/axios.js';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import htmlToPdfmake from 'html-to-pdfmake';
 import pdfMake from 'pdfmake/build/pdfmake';
-import { PrimeIcons } from '@primevue/core/api';
+import { PrimeIcons } from 'primevue/api';
 pdfMake.fonts = {
     Roboto: {
         normal: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf',
@@ -18,7 +18,7 @@ pdfMake.fonts = {
 
 const nome = ref('');
 const orcamentoSelecionado = ref('');
-const urlEnvio = ref('https://hook.us1.make.com/54rxy6nyaolwu3gx82eftyspmojl7rov');
+const urlEnvio = ref(import.meta.env.VITE_WEBHOOK_MAKE_ORC_RAPIDO);
 const telefone = ref('');
 const produtos = ref([{ produto: '', quantidade: 1, codigo: '', valorUnitario: 0.0, valorTotal: 0.0 }]);
 const produtosEncontrados = ref([{ produto: '', codigo: '', valorUnitario: 0 }]);
@@ -52,12 +52,14 @@ const nomeVendedores = ref([
     { code: 'rosa', name: 'Rosa' },
     { code: 'nilson', name: 'Nilson' },
     { code: 'lucia', name: 'Lúcia' },
+    { code: 'daiana', name: 'Daiana' },
+    { code: 'daniele', name: 'Daniele' },
     { code: 'outros', name: 'Outros' }
 ]);
 const dialogVisible = ref(false);
 const dialogConversaoVisible = ref(false);
-const vendedor = ref(null);
-const totalOrcamento = ref(0);
+const vendedor = ref('null');
+const totalOrcamento = ref(0.00);
 const opcoesConsulta = ref(['nome', 'codigo']);
 const opcoesEnvio = ref([
     { code: 'com-preco', name: 'Sim' },
@@ -135,26 +137,31 @@ const fetchOperacaoBimer = async () => {
 
         operacoesBimer.value = operacoesEncontradas.value.map(
             (operacaoBimer) =>
-                ({
-                    value: `${operacaoBimer.codigo} - ${operacaoBimer.nome.trim()}`
-                }.value)
+            ({
+                value: `${operacaoBimer.codigo} - ${operacaoBimer.nome.trim()}`
+            }.value)
         );
     } catch (error) {
         console.error('Erro ao buscar Operações:', error);
         return [];
     }
 };
-const processaInfosOperacao = (val) => {
+const processaInfosOperacao = async (val) => {
     try {
         const resultado = operacoesEncontradas.value.find((e) => {
             return e.codigo.trim() === val.value.split('-')[0].trim(); // Adiciona o return para a comparação
         });
-        console.log(resultado);
+
         if (resultado) {
-            console.log(resultado);
+            const operacao = await instanceLocalServer.get(`bimer/api/operacoes/${resultado.identificador}`);
+            orcConvertPedido.value.configuracao.operacao = {
+                idOperacao: operacao.data.resposta.ListaObjetos[0].Identificador,
+                nome: operacao.data.resposta.ListaObjetos[0].Nome,
+                codigo: operacao.data.resposta.ListaObjetos[0].Codigo
+            }
         }
     } catch (error) {
-        console.error('Erro ao buscar setores:', error);
+        console.error('Erro ao buscar Operacoes:', error);
         return [];
     }
 };
@@ -173,9 +180,9 @@ const fetchPessoas = async (val) => {
         }));
         pessoas.value = pessoasEncontradas.value.map(
             (pessoa) =>
-                ({
-                    value: `${pessoa.cpf} - ${pessoa.nome.trim()}`
-                }.value)
+            ({
+                value: `${pessoa.cpf} - ${pessoa.nome.trim()}`
+            }.value)
         );
     } catch (error) {
         console.error('Erro ao buscar Pessoa:', error);
@@ -183,18 +190,14 @@ const fetchPessoas = async (val) => {
     }
 };
 
-const processaInfosPessoas = async(val) => {
-
+const processaInfosPessoas = async (val) => {
     try {
         const resultado = pessoasEncontradas.value.find((e) => {
-            console.log(e)
             return e.cpf.trim() === val.value.split('-')[0].trim(); // Adiciona o return para a comparação
         });
         if (resultado) {
-            const pessoa = await instanceLocalServer.get(`bimer/api/pessoas?cpfCnpj=${resultado}`);
-            orcConvertPedido.value.cliente = JSON.parse(JSON.stringify(pessoa));
-            console.log("rodou")
-            console.log(orcConvertPedido)
+            const pessoa = await instanceLocalServer.get(`bimer/api/pessoas?cpfCnpj=${resultado.cpf}`);
+            orcConvertPedido.value.cliente = JSON.parse(JSON.stringify(pessoa.data.resposta.ListaObjetos[0]));
         }
     } catch (error) {
         console.error('Erro ao buscar Pessoas', error);
@@ -219,9 +222,9 @@ const fetchEmpresas = async (val) => {
         }));
         empresas.value = empresasEncontradas.value.map(
             (empresa) =>
-                ({
-                    value: `${empresa.codigo} - ${empresa.nome.trim()}`
-                }.value)
+            ({
+                value: `${empresa.codigo} - ${empresa.nome.trim()}`
+            }.value)
         );
     } catch (error) {
         console.error('Erro ao buscar Empresas:', error);
@@ -260,9 +263,9 @@ const fetchPrecosBimer = async () => {
         }));
         precosBimer.value = precosEncontrados.value.map(
             (precoBimer) =>
-                ({
-                    value: `${precoBimer.codigo} - ${precoBimer.nome.trim()}`
-                }.value)
+            ({
+                value: `${precoBimer.codigo} - ${precoBimer.nome.trim()}`
+            }.value)
         );
     } catch (error) {
         console.error('Erro ao buscar Preços:', error);
@@ -295,7 +298,6 @@ const fetchSetoresBimer = async () => {
         showMessage('warn', 'Atenção', 'Selecione primeiro uma empresa');
     } else {
         try {
-            console.log(empresaSelecionada);
             const setorBimer = await instanceLocalServer.get(`bimer/api/setores`);
             setoresEncontrados.value = setorBimer.data.resposta.ListaObjetos.filter((setorBimer) => setorBimer.Empresa.Codigo == JSON.parse(empresaSelecionada).codigo).map((setorBimer) => ({
                 empresa: `${setorBimer.Empresa.Codigo}`,
@@ -305,9 +307,9 @@ const fetchSetoresBimer = async () => {
             }));
             setoresBimer.value = setoresEncontrados.value.map(
                 (setorBimer) =>
-                    ({
-                        value: `${setorBimer.codigo} - ${setorBimer.nome.trim()}`
-                    }.value)
+                ({
+                    value: `${setorBimer.codigo} - ${setorBimer.nome.trim()}`
+                }.value)
             );
         } catch (error) {
             console.error('Erro ao buscar Setores:', error);
@@ -340,9 +342,9 @@ const fetchProdutos = async (val) => {
         const produto = await instanceLocalServer.get(`bimer/${rota}?query=${val.query}&idempresa=${dadosEmpresa.value.empresa.codigo}&idpreco=${dadosEmpresa.value.precos.identificador}&idsetor=${dadosEmpresa.value.setor.identificador}`);
         sugestoesProdutos.value = produto.data.produtos.map(
             (produto) =>
-                ({
-                    value: `${produto.codigo.trim()} | ${produto.nome} | R$ ${produto.preco}`
-                }.value)
+            ({
+                value: `${produto.codigo.trim()} | ${produto.nome} | R$ ${produto.preco}`
+            }.value)
         );
 
         produtosEncontrados.value = produto.data.produtos.map((produto) => ({
@@ -461,7 +463,7 @@ const gerarLayoutImpressao = () => {
             </thead>
             <tbody>
               ${orcamentoSelecionado.value.ProdutosOrcamentos.map(
-                  (produto) => `
+        (produto) => `
                   <tr>
                     <td>${produto.codigo}</td>
                     <td>${produto.nome}</td>
@@ -470,7 +472,7 @@ const gerarLayoutImpressao = () => {
                     <td>${formatCurrency(produto.valorTotal)}</td>
                   </tr>
                 `
-              ).join('')}
+    ).join('')}
             </tbody>
           </table>
         </div>
@@ -501,11 +503,11 @@ const submitForm = async () => {
     let produtosFormatados = '';
     try {
         if (opcaoEnvioSelecionada.value.code == 'sem-preco') {
-            produtosFormatados = produtos.value.map((produto) => `${produto.codigo} - ${produto.produto} \n Quantidade: ${produto.quantidade}`).join('\n \n');
+            produtosFormatados = produtos.value.map((produto) => `${produto.codigo} - ${produto.produto} \\n Quantidade: ${produto.quantidade}`).join('\\n\\n');
         } else {
             produtosFormatados = produtos.value
-                .map((produto) => `${produto.codigo} - ${produto.produto} \n ${formatCurrency(parseFloat(produto.valorUnitario))} x ${produto.quantidade} = ${formatCurrency(parseFloat(produto.valorTotal))}`)
-                .join('\n \n');
+                .map((produto) => `${produto.codigo} - ${produto.produto} \\n ${formatCurrency(parseFloat(produto.valorUnitario))} x ${produto.quantidade} = ${formatCurrency(parseFloat(produto.valorTotal))}`)
+                .join('\\n \\n');
         }
         const data = {
             name: nome.value,
@@ -543,7 +545,7 @@ const submitForm = async () => {
         telefone.value = '';
         vendedor.value = '';
         produtos.value = [{ produto: '', quantidade: 1, codigo: '', valorUnitario: 0, valorTotal: 0 }];
-        totalOrcamento.value = 0;
+        totalOrcamento.value = 0.00;
         showMessage('success', 'Orçamento Enviado', 'Orçamento Enviado com Sucesso, em breve seu cliente receberá uma mensagem');
         fetchOrcamentos();
         submitButtonOrcStatus.value = true;
@@ -556,8 +558,7 @@ const submitForm = async () => {
 };
 
 const formatCurrency = (value) => {
-    console.log(typeof value + value);
-    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits:2 });
 };
 
 const fetchOrcamentos = async () => {
@@ -570,7 +571,6 @@ const fetchOrcamentos = async () => {
 };
 
 const requireConfirmation = (orcamento) => {
-    console.log(orcamento);
     confirm.require({
         group: 'headless',
         header: 'Escolha uma opção',
@@ -588,11 +588,11 @@ const reenviarOrcamento = async (orcamento, type) => {
     orcamentoSelecionado.value = await getOrcamentoById(orcamento);
     let produtosFormatados = '';
     if (type == 'sem-preco') {
-        produtosFormatados = orcamentoSelecionado.value.ProdutosOrcamentos.map((produto) => `${produto.codigo} - ${produto.nome} \n Quantidade: ${produto.quantidade}`).join('\n \n');
+        produtosFormatados = orcamentoSelecionado.value.ProdutosOrcamentos.map((produto) => `${produto.codigo} - ${produto.nome} \\n Quantidade: ${produto.quantidade}`).join('\\n \\n');
     } else {
         produtosFormatados = orcamentoSelecionado.value.ProdutosOrcamentos.map(
-            (produto) => `${produto.codigo} - ${produto.nome} \n ${formatCurrency(produto.valorunitario)} x ${produto.quantidade} = ${formatCurrency(produto.valorunitario * produto.quantidade)}`
-        ).join('\n \n');
+            (produto) => `${produto.codigo} - ${produto.nome} \\n ${formatCurrency(produto.valorunitario)} x ${produto.quantidade} = ${formatCurrency(produto.valorunitario * produto.quantidade)}`
+        ).join('\\n \\n');
     }
     try {
         const data = {
@@ -614,22 +614,100 @@ const reenviarOrcamento = async (orcamento, type) => {
 const gerarPedidoDeVenda = async (orcamento) => {
     const cliente = await instanceLocalServer.get(`bimer/consulta-cliente-telefone?query=${orcamento.telefone}`);
     const config = await instanceLocalServer.get('bimer/api/configuracoes?nomeSecao=Faturamento.Documento');
-    orcConvertPedido.value={
+    const caracEntregaFutura = await instanceLocalServer.get('bimer/api/configuracoes?nomeSecao=Estoque.Produto');
+    const produtosOrcamento = [];
+    let operacao = {}
+    let entregaFutura = {}
+    if (config) {
+        const idOperacao = config.data.resposta.ListaObjetos.filter((config) => config.NomeConfiguracao == 'IdOperacaoNF')[0].Valor
+        operacao = await instanceLocalServer.get(`bimer/api/operacoes/${idOperacao}`)
+    }
+    const stTrabalhaEntregaImediataFutura = caracEntregaFutura.data.resposta.ListaObjetos.filter((config) => config.NomeConfiguracao == 'StTrabalhaEntregaImediataFutura')[0].Valor
+    if (stTrabalhaEntregaImediataFutura == 1) {
+        console.log(stTrabalhaEntregaImediataFutura)
+        if (caracEntregaFutura) {
+            const idCaracteristicaEntregaFutura = caracEntregaFutura.data.resposta.ListaObjetos.filter((config) => config.NomeConfiguracao == 'IdCaracteristicaEntregaFutura')[0].Valor
+            entregaFutura = {
+                IdCaracteristicaEntregaFutura: idCaracteristicaEntregaFutura,
+                StTrabalhaEntregaImediataFutura: stTrabalhaEntregaImediataFutura
+            }
+        }
+    }
+    const orcamentoConecta = await getOrcamentoById(orcamento);
+    for (let i = 0; i < orcamentoConecta.ProdutosOrcamentos.length; i++) {
+        const codigo = await instanceLocalServer.get(`bimer/api/produtos?codigo=${orcamentoConecta.ProdutosOrcamentos[i].codigo}`);
+        const caracteristicasProduto = codigo.data.resposta.ListaObjetos[0].CaracteristicasProduto.map((caracteristicas) => caracteristicas.Identificador);
+        let entregaFuturaValue
+        if (stTrabalhaEntregaImediataFutura == 1) {
+            entregaFuturaValue = caracteristicasProduto.includes(entregaFutura.IdCaracteristicaEntregaFutura) ? 1 : 0;
+        } else {
+            entregaFuturaValue = 0;
+        }
+        produtosOrcamento.push({
+            IdentificadorProduto: codigo.data.resposta.ListaObjetos[0].Identificador,
+            Codigo: codigo.data.resposta.ListaObjetos[0].Codigo,
+            Nome: codigo.data.resposta.ListaObjetos[0].Nome,
+            EntregaFutura: entregaFuturaValue,
+            QuantidadePedida: orcamentoConecta.ProdutosOrcamentos[i].quantidade,
+            ValorUnitario: orcamentoConecta.ProdutosOrcamentos[i].valorunitario,
+            Valor: orcamentoConecta.ProdutosOrcamentos[i].valorTotal
+        })
+    }
+    orcConvertPedido.value = {
         cliente: cliente.data.detalhesPessoa.ListaObjetos[0],
-        configuracao: config.data.resposta.ListaObjetos.filter((config)=>config.NomeConfiguracao == 'IdOperacaoNF')
+        empresa: orcamento.dadosEmpresa,
+        preco: orcamento.dadosEmpresa.precos,
+        setor: orcamento.dadosEmpresa.setor,
+        configuracao: {
+            operacao: {
+                idOperacao: operacao.data.resposta.ListaObjetos[0].Identificador,
+                nome: operacao.data.resposta.ListaObjetos[0].Nome,
+                codigo: operacao.data.resposta.ListaObjetos[0].Codigo
+            },
+            entregaFutura
+        },
+        produtos: produtosOrcamento,
+    }
+    idpessoa.value = `${orcConvertPedido.value.cliente.CpfCnpjCompleto} - ${orcConvertPedido.value.cliente.Nome}`
+    idOperacaoBimer.value = `${orcConvertPedido.value.configuracao.operacao.codigo} - ${orcConvertPedido.value.configuracao.operacao.nome}`
+    processaInfosPessoas({ value: idpessoa.value })
+    processaInfosOperacao({ value: idOperacaoBimer.value })
+    dialogConversaoVisible.value = true;
+
+    console.log(orcConvertPedido.value)
+
+    // setPedidoVenda(orcConvertPedido.value)
+};
+
+const setPedidoVenda = async (orcConvertido) => {
+
+    try {
+        const pedido = {
+            CodigoEmpresa: orcConvertido.empresa.empresa.codigo,
+            CodigoEmpresaEstoque: orcConvertido.empresa.empresa.codigo,
+            CodigoEmpresaFinanceiro: orcConvertido.empresa.empresa.codigo,
+            DataEmissao: new Date().toISOString(),
+            DataEntrega: new Date().toISOString(),
+            FaturamentoParcial: true,
+            IdentificadorCliente: orcConvertido.cliente.Identificador,
+            IdentificadorOperacao: orcConvertido.configuracao.operacao.idOperacao,
+            Items: orcConvertido.produtos,
+            Observacao: "Cadastrado via Beng - Conecta Varejo",
+            ObservacaoDocumento: "Cadastrado via Beng - Conecta Varejo",
+            Status: "A",
+            IndicadorAtendimentoPresencial: 1,
+        }
+
+        const pedidoEnviado = await instanceLocalServer.post('bimer/api/venda/pedidos', pedido);
+
+        console.log(pedidoEnviado)
+
+
+    } catch (error) {
+        console.log(error)
     }
 
-    idpessoa.value=`${orcConvertPedido.value.cliente.CpfCnpjCompleto} - ${orcConvertPedido.value.cliente.Nome}`
-    pessoasEncontradas.value=[{
-            codigo: `${orcConvertPedido.value.cliente.Codigo}`,
-            nome: `${orcConvertPedido.value.cliente.Nome.trim()}`,
-            cpf: `${orcConvertPedido.value.cliente.CpfCnpjCompleto}`}]
-    
-    processaInfosPessoas(idpessoa.value.toString())
-
-    console.log(JSON.stringify(orcConvertPedido.value));
-    dialogConversaoVisible.value = true;
-};
+}
 
 watchEffect(() => {
     calcularTotalCompra();
@@ -647,50 +725,47 @@ fetchOrcamentos();
                     <div class="flex flex-wrap">
                         <div class="field col-12 md:col-6">
                             <label for="idempresa">Empresa</label>
-                            <AutoComplete id="idempresa" v-model="idempresa" dropdown :suggestions="empresas" @complete="fetchEmpresas" @item-select="processaInfosEmpresa($event)" />
+                            <AutoComplete id="idempresa" v-model="idempresa" dropdown :suggestions="empresas"
+                                @complete="fetchEmpresas" @item-select="processaInfosEmpresa($event)" />
                         </div>
                         <div class="field col-12 md:col-3">
                             <label for="idPrecoBimer">Tabela de Preço</label>
-                            <AutoComplete id="idPrecoBimer" v-model="idPrecoBimer" dropdown :suggestions="precosBimer" @complete="fetchPrecosBimer" @item-select="processaInfosPrecos($event)" />
+                            <AutoComplete id="idPrecoBimer" v-model="idPrecoBimer" dropdown :suggestions="precosBimer"
+                                @complete="fetchPrecosBimer" @item-select="processaInfosPrecos($event)" />
                         </div>
                         <div class="field col-12 md:col-3">
                             <label for="idSetorBimer">Setor</label>
-                            <AutoComplete id="idSetorBimer" v-model="idSetorBimer" dropdown :suggestions="setoresBimer" @complete="fetchSetoresBimer" @item-select="processaInfosSetores($event)" />
+                            <AutoComplete id="idSetorBimer" v-model="idSetorBimer" dropdown :suggestions="setoresBimer"
+                                @complete="fetchSetoresBimer" @item-select="processaInfosSetores($event)" />
                         </div>
                     </div>
                     <div class="flex flex-wrap">
                         <div class="field col-12 md:col-4">
-                            <div class="p-inputgroup">
-                                <span class="p-inputgroup-addon">
-                                    <i class="pi pi-user"></i>
-                                </span>
+                            <InputGroup>
+                                <InputGroupAddon><i class="pi pi-user"></i></InputGroupAddon>
                                 <span class="p-float-label">
                                     <InputText v-model="nome" id="nome" required />
                                     <label for="nome">Nome</label>
                                 </span>
-                            </div>
+                            </InputGroup>
                         </div>
                         <div class="field col-12 md:col-4">
-                            <div class="p-inputgroup">
-                                <span class="p-inputgroup-addon">
-                                    <i class="pi pi-whatsapp"></i>
-                                </span>
+                            <InputGroup>
+                                <InputGroupAddon><i class="pi pi-whatsapp"></i></InputGroupAddon>
                                 <span class="p-float-label">
                                     <InputMask v-model="telefone" id="telefone" mask="99999999999" required />
                                     <label for="telefone">Telefone</label>
                                 </span>
-                            </div>
+                            </InputGroup>
                         </div>
 
                         <div class="field col-12 md:col-4">
-                            <div class="p-inputgroup">
-                                <span class="p-inputgroup-addon">
-                                    <i class="pi pi-heart-fill"></i>
-                                </span>
-                                <span class="p-float-label">
-                                    <Select v-model="vendedor" id="vendedor" optionLabel="name" :options="nomeVendedores" placeholder="Selecione um vendedor " required> </Select>
-                                </span>
-                            </div>
+                            <InputGroup>
+                                <InputGroupAddon><i class="pi pi-heart-fill"></i></InputGroupAddon>
+                                    <Dropdown v-model="vendedor" id="vendedor" optionLabel="name"
+                                        :options="nomeVendedores" placeholder="Selecione um vendedor" required>
+                                    </Dropdown>
+                            </InputGroup>
                         </div>
                     </div>
                 </Fieldset>
@@ -704,46 +779,50 @@ fetchOrcamentos();
                         <SelectButton v-model="opcaoEnvioSelecionada" :options="opcoesEnvio" optionLabel="name" />
                     </div>
                 </div>
-                <div v-for="(produto, index) in produtos" :key="index" class="field col-12 md:col-12 mt-3" style="padding-top: 1px; padding-bottom: 1px">
-                    <div class="p-inputgroup">
-                        <span class="p-inputgroup-addon">
-                            <i class="pi pi-box"></i>
-                        </span>
-                        <label class="p-inputgroup-addon">cod: <br />{{ produtos[index].codigo }}</label>
-                        <label class="p-inputgroup-addon"
-                            >Vl.Uni: <br />
-                            R$ {{ produtos[index].valorUnitario }}</label
-                        >
-                        <AutoComplete
-                            style="width: 45%"
-                            v-model="produtos[index].produto"
-                            @loading="true"
-                            @complete="fetchProdutos"
-                            :suggestions="sugestoesProdutos"
-                            placeholder="Digite para buscar produtos"
-                            :id="'produto-' + index"
-                            @item-select="preencherInfos($event, index)"
-                        />
-                        <InputNumber style="width: 5%" v-model="produtos[index].quantidade" mode="decimal" @update:modelValue="calcularTotalItem(index)" />
-                        <label class="p-inputgroup-addon"
-                            >Vl.Total: <br />
-                            R$ {{ produtos[index].valorTotal }}</label
-                        >
-                        <span class="p-buttonset">
-                            <Button type="button" @click="adicionarProduto" icon="pi pi-plus-circle" class="p-button-success"></Button>
-                            <Button v-if="produtos.length > 1" type="button" @click="removerProduto(index)" icon="pi pi-trash" class="p-button-danger"></Button>
-                            <Button v-if="produtos.length === 1" type="button" @click="removerProduto(index)" icon="pi pi-trash" class="p-button-danger" disabled></Button>
-                        </span>
-                    </div>
+                <div class="col-12 md:col-12 font-bold" style="padding-top: 1px; padding-bottom: 1px">
+                    <InputGroup style="border: 0px !important;">
+                        <InputGroupAddon style="width:3; border: 0px !important;"></InputGroupAddon>
+                        <InputGroupAddon style="width:10%;border: 0px !important;"><label>Cod.</label></InputGroupAddon>
+                        <InputGroupAddon style="width:13%;border: 0px !important;"><label>Vl.Uni</label></InputGroupAddon>
+                        <InputGroupAddon style="width:42%;border: 0px !important;"><label>Descrição</label></InputGroupAddon>
+                        <InputGroupAddon style="width:5%;border: 0px !important;"><label>Qt.</label></InputGroupAddon>
+                        <InputGroupAddon style="width:15%;border: 0px !important;"><label>Vl.Total</label></InputGroupAddon>
+                        <InputGroupAddon style="width:12%;border: 0px !important;"><label></label></InputGroupAddon>
+                    </InputGroup>
+                </div>
+                <div v-for="(produto, index) in produtos" :key="index" class="mb-1 col-12 md:col-12"
+                    style="padding-top: 1px; padding-bottom: 1px">
+                    <InputGroup>
+                        <InputGroupAddon style="width:3;"><i class="pi pi-box"></i></InputGroupAddon>
+                        <InputGroupAddon style="width:10%;"><label>{{ produtos[index].codigo }}</label></InputGroupAddon>
+                        <InputGroupAddon style="width:13%;"><label>R$ {{ produtos[index].valorUnitario }}</label>
+                        </InputGroupAddon>
+                        <AutoComplete style="width: 42%" v-model="produtos[index].produto" @loading="true"
+                            @complete="fetchProdutos" :suggestions="sugestoesProdutos"
+                            placeholder="Digite para buscar produtos" :id="'produto-' + index"
+                            @item-select="preencherInfos($event, index)" />
+                        <InputNumber style="width: 5%" v-model="produtos[index].quantidade" mode="decimal"
+                            @update:modelValue="calcularTotalItem(index)" />
+                        <InputGroupAddon style="width:15%;"><label>R$ {{ produtos[index].valorTotal }}</label>
+                        </InputGroupAddon>
+                        <Button style="width:6%;" type="button" @click="adicionarProduto" icon="pi pi-plus-circle"
+                            class="p-button-success"></Button>
+                        <Button style="width:6%;" v-if="produtos.length > 1" type="button" @click="removerProduto(index)"
+                            icon="pi pi-trash" class="p-button-danger"></Button>
+                        <Button style="width:6%;" v-if="produtos.length === 1" type="button" @click="removerProduto(index)"
+                            icon="pi pi-trash" class="p-button-danger" disabled></Button>
+                    </InputGroup>
                 </div>
                 <div class="field col-12 md:col-12">
                     <label>Total Orcamento: R$ {{ totalOrcamento }}</label>
-                    <Button type="submit" class="justify-content-center" :disabled="!submitButtonOrcStatus">Enviar Orçamento</Button>
+                    <Button type="submit" class="justify-content-center" :disabled="!submitButtonOrcStatus">Enviar
+                        Orçamento</Button>
                 </div>
             </form>
         </div>
         <div class="mt-4">
-            <DataTable :value="orcamentos" :paginator="true" :rows="10" :filters="filters" v-model:filters="filters" sortField="id" :sortOrder="-1" filterDisplay="menu">
+            <DataTable :value="orcamentos" :paginator="true" :rows="10" :filters="filters" v-model:filters="filters"
+                sortField="id" :sortOrder="-1" filterDisplay="menu">
                 <Column field="id" header="Codigo"></Column>
                 <Column field="nome" header="Cliente"></Column>
                 <Column field="telefone" header="Telefone"></Column>
@@ -753,12 +832,13 @@ fetchOrcamentos();
                         {{ formatarData(data.createdAt) }}
                     </template>
                     <template #filter="{ filterModel }">
-                        <DatePicker v-model="filterModel.value" dateFormat="mm/dd/yy" placeholder="dd/mm/yyyy" />
+                        <DatePicker v-model="filterModel.value" placeholder="dd/mm/yyyy" />
                     </template>
                 </Column>
                 <Column header="Ações">
                     <template #body="slotProps">
-                        <SplitButton icon="pi pi-eye" dropdownIcon="pi pi-cog" @click="abrirOverlayPanel(slotProps.data)" :model="optionsMenuActions(slotProps.data)" />
+                        <SplitButton icon="pi pi-eye" dropdownIcon="pi pi-cog"
+                            @click="abrirOverlayPanel(slotProps.data)" :model="optionsMenuActions(slotProps.data)" />
                     </template>
                 </Column>
             </DataTable>
@@ -770,10 +850,12 @@ fetchOrcamentos();
     <Dialog v-model:visible="dialogVisible" header="Detalhes do Orçamento" modal>
         <div>
             <p>
-                <strong>Empresa:</strong> {{ orcamentoSelecionado.dadosEmpresa.empresa.nome }} <br /><strong>Tabela de Preço:</strong> {{ orcamentoSelecionado.dadosEmpresa.precos.nome }} <br /><Strong>Setor:</Strong>
+                <strong>Empresa:</strong> {{ orcamentoSelecionado.dadosEmpresa.empresa.nome }} <br /><strong>Tabela de
+                    Preço:</strong> {{ orcamentoSelecionado.dadosEmpresa.precos.nome }} <br /><Strong>Setor:</Strong>
                 {{ orcamentoSelecionado.dadosEmpresa.setor.nome }}
             </p>
-            <p><strong>Nome:</strong> {{ orcamentoSelecionado.nome }} <strong> - Telefone:</strong> {{ orcamentoSelecionado.telefone }} <Strong> - Vendedor:</Strong> {{ orcamentoSelecionado.vendedor }}</p>
+            <p><strong>Nome:</strong> {{ orcamentoSelecionado.nome }} <strong> - Telefone:</strong> {{
+                orcamentoSelecionado.telefone }} <Strong> - Vendedor:</Strong> {{ orcamentoSelecionado.vendedor }}</p>
 
             <DataTable :value="orcamentoSelecionado.ProdutosOrcamentos" :paginator="true" :rows="10">
                 <Column field="codigo" header="Codigo"></Column>
@@ -794,105 +876,53 @@ fetchOrcamentos();
     </Dialog>
 
     <!-- chama dialog Converter em pedido de venda -->
-    <Dialog v-model:visible="dialogConversaoVisible" modal header="Gerar Pedido/Pré-pedido | Empresa: {orcamentoSelecionado.dadosEmpresa.empresa.nome}" class="m-5">
-        <div class="p-fluid mt-0" style="margin-top: -20px !important">
-            <form @submit.prevent="submitForm" class="flex flex-wrap">
+    <Dialog v-model:visible="dialogConversaoVisible" header="Gerar Pedido" modal class="w-100 m-5">
+        <div class="p-fluid mt-0" style="margin-top: -30px !important">
+            <form @submit.prevent="submitForm">
                 <div class="flex flex-wrap col-12 md:col-12 mt-0">
-                    <div class="field col-12 md:col-6">
-                        <label for="idpessoa">Cliente</label>
-                        <div class="flex">
-                            <AutoComplete id="idpessoa" v-model="idpessoa" :suggestions="pessoas" @complete="fetchPessoas" @item-select="processaInfosPessoas($event)" />
+                    <Fieldset legend="Dados do Cliente" class="field col-12 md:col-6">
+                        <div>
+                            <label for="idpessoa">Cliente</label>
+                            <AutoComplete id="idpessoa" v-model="idpessoa" :suggestions="pessoas"
+                                @complete="fetchPessoas" @item-select="processaInfosPessoas($event)" />
                         </div>
-                    </div>
+                        <div class="mt-2">
+                            ({{ orcConvertPedido.cliente.Codigo }}) - {{ orcConvertPedido.cliente.Nome }} <br />
+                            CPF/CNPJ: {{ orcConvertPedido.cliente.CpfCnpjCompleto }} I.E.: {{
+                                orcConvertPedido.cliente.InscricaoEstadual }} <br />
+                            {{ orcConvertPedido.cliente.EnderecoPrincipal.TipoNomeNumeroComplementoLogradouro }} Bairro:
+                            {{
+                                orcConvertPedido.cliente.EnderecoPrincipal.Bairro.Nome }}
+                            Cidade: {{ orcConvertPedido.cliente.EnderecoPrincipal.Cidade.Nome }}
+                        </div>
+                    </Fieldset>
                     <div class="field col-12 md:col-6">
-                        <label for="idOperacaoBimerVendas">Operação</label>
-                        <AutoComplete id="idOperacaoBimerVendas" v-model="idOperacaoBimerVendas" dropdown :suggestions="operacoesBimer" @complete="fetchPrecosBimer" @item-select="processaInfosPrecos($event)" />
+                        <label for="idOperacaoBimer">Operação</label>
+                        <AutoComplete id="idOperacaoBimer" v-model="idOperacaoBimer" dropdown
+                            :suggestions="operacoesBimer" @complete="fetchOperacaoBimer"
+                            @item-select="processaInfosOperacao($event)" />
                     </div>
                 </div>
-                <!-- <div class="col-12 md:col-12 flex flex-wrap" style="margin-top:-20px!important">
-                    <DataTable
-                    ref="dt"
-                    :value="products"
-                    v-model:selection="selectedProducts"
-                    dataKey="id"
-                    :paginator="true"
-                    :rows="10"
-                   :filters="filters"
-                    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                    :rowsPerPageOptions="[5, 10, 25]"
-                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
-                >
-                    <template #header>
-                        <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-                            <h5 class="m-0">Manage Products</h5>
-                            <IconField iconPosition="left" class="block mt-2 md:mt-0">
-                                <InputIcon class="pi pi-search" />
-                                <InputText class="w-full sm:w-auto" v-model="filters['global'].value" placeholder="Search..." />
-                            </IconField>
-                        </div>
-                    </template>
-
-                    <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-                    <Column field="code" header="Code" :sortable="true" headerStyle="width:14%; min-width:10rem;">
-                        <template #body="slotProps">
-                            <span class="p-column-title">Code</span>
-                            {{ slotProps.data.code }}
-                        </template>
-                    </Column>
-                    <Column field="name" header="Name" :sortable="true" headerStyle="width:14%; min-width:10rem;">
-                        <template #body="slotProps">
-                            <span class="p-column-title">Name</span>
-                            {{ slotProps.data.name }}
-                        </template>
-                    </Column>
-                    <Column header="Image" headerStyle="width:14%; min-width:10rem;">
-                        <template #body="slotProps">
-                            <span class="p-column-title">Image</span>
-                            <img :src="'/demo/images/product/' + slotProps.data.image" :alt="slotProps.data.image" class="shadow-2" width="100" />
-                        </template>
-                    </Column>
-                    <Column field="price" header="Price" :sortable="true" headerStyle="width:14%; min-width:8rem;">
-                        <template #body="slotProps">
-                            <span class="p-column-title">Price</span>
-                            {{ formatCurrency(slotProps.data.price) }}
-                        </template>
-                    </Column>
-                    <Column field="category" header="Category" :sortable="true" headerStyle="width:14%; min-width:10rem;">
-                        <template #body="slotProps">
-                            <span class="p-column-title">Category</span>
-                            {{ slotProps.data.category }}
-                        </template>
-                    </Column>
-                    <Column field="rating" header="Reviews" :sortable="true" headerStyle="width:14%; min-width:10rem;">
-                        <template #body="slotProps">
-                            <span class="p-column-title">Rating</span>
-                            <Rating :modelValue="slotProps.data.rating" :readonly="true" :cancel="false" />
-                        </template>
-                    </Column>
-                    <Column field="inventoryStatus" header="Status" :sortable="true" headerStyle="width:14%; min-width:10rem;">
-                        <template #body="slotProps">
-                            <span class="p-column-title">Status</span>
-                            <Tag :severity="getBadgeSeverity(slotProps.data.inventoryStatus)">{{ slotProps.data.inventoryStatus }}</Tag>
-                        </template>
-                    </Column>
-                    <Column headerStyle="min-width:10rem;">
-                        <template #body="slotProps">
-                            <Button icon="pi pi-pencil" class="mr-2" severity="success" rounded @click="editProduct(slotProps.data)" />
-                            <Button icon="pi pi-trash" class="mt-2" severity="warning" rounded @click="confirmDeleteProduct(slotProps.data)" />
-                        </template>
-                    </Column>
-                </DataTable>
-                </div> -->
+                <div class="card">
+                    <DataTable :value="orcConvertPedido.produtos" tableStyle="min-width: 50rem">
+                        <Column field="Codigo" header="Codigo"></Column>
+                        <Column field="Nome" header="Nome"></Column>
+                        <Column field="EntregaFutura" header="Ent. Futura"></Column>
+                        <Column field="QuantidadePedida" header="Qt."></Column>
+                        <Column field="ValorUnitario" header="Vl. Unitário"></Column>
+                        <Column field="Valor" header="Vl. Total"></Column>
+                    </DataTable>
+                </div>
             </form>
         </div>
-        <div></div>
     </Dialog>
 
     <!-- chama dialog Enviar Mensagem Whatsapp -->
     <ConfirmDialog group="headless">
         <template #container="{ message, acceptCallback, rejectCallback }">
             <div class="flex flex-column align-items-center p-5 surface-overlay border-round">
-                <div class="border-circle bg-primary inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
+                <div
+                    class="border-circle bg-primary inline-flex justify-content-center align-items-center h-6rem w-6rem -mt-8">
                     <i class="pi pi-question text-5xl"></i>
                 </div>
                 <span class="font-bold text-2xl block mb-2 mt-4">{{ message.header }}</span>

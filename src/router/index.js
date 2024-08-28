@@ -28,6 +28,39 @@ const router = createRouter({
                             path: '/painel/bimer/orcamento-rapido',
                             name: 'OrcamentoRapido',
                             component: () => import('@/views/pages/modulos/bimer/OrcamentoRapido.vue')
+                        },
+                        {
+                            path: '/painel/bimer/rfv',
+                            name: 'Rfv',
+                            children:[
+                                {   
+                                    path: '/painel/bimer/rfv/vincula-caracteristicas',
+                                    name: 'VinculaCaracteristica',
+                                    component: () => import('@/views/pages/modulos/bimer/RelacionaCaracteristicaRfv.vue')
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    path: '/painel/ferramentas',
+                    name: 'Ferramentas',
+                    children: [
+                        {
+                            path: '/painel/ferramentas/redimensiona-imagem',
+                            name: 'RedimensionaImagem',
+                            component: () => import('@/views/pages/ferramentas/RedimensionaImagem.vue')
+                        }
+                    ]
+                },
+                {
+                    path: '/painel/configs-gerais',
+                    name: 'ConfiguracoesGerais',
+                    children: [
+                        {
+                            path: '/painel/configs-gerais/usuarios',
+                            name: 'Usuarios',
+                            component: () => import('@/views/pages/configuracoes/Usuarios.vue')
                         }
                     ]
                 }

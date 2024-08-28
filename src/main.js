@@ -14,7 +14,7 @@ import BlockUI from 'primevue/blockui';
 import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
 import Breadcrumb from 'primevue/breadcrumb';
-import DatePicker from 'primevue/datepicker';
+import Calendar from 'primevue/calendar';
 import Card from 'primevue/card';
 import Chart from 'primevue/chart';
 import CascadeSelect from 'primevue/cascadeselect';
@@ -36,7 +36,7 @@ import Dialog from 'primevue/dialog';
 import DialogService from 'primevue/dialogservice';
 import Divider from 'primevue/divider';
 import Dock from 'primevue/dock';
-import Select from 'primevue/select';
+import Dropdown from 'primevue/dropdown';
 import DynamicDialog from 'primevue/dynamicdialog';
 import Fieldset from 'primevue/fieldset';
 import FileUpload from 'primevue/fileupload';
@@ -49,7 +49,7 @@ import Inplace from 'primevue/inplace';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import InputIcon from 'primevue/inputicon';
-import ToggleSwitch from 'primevue/toggleswitch';
+import InputSwitch from 'primevue/inputswitch';
 import InputText from 'primevue/inputtext';
 import InputMask from 'primevue/inputmask';
 import InputNumber from 'primevue/inputnumber';
@@ -62,7 +62,7 @@ import Message from 'primevue/message';
 import MultiSelect from 'primevue/multiselect';
 import OrderList from 'primevue/orderlist';
 import OrganizationChart from 'primevue/organizationchart';
-import PopOver from 'primevue/popover';
+import OverlayPanel from 'primevue/overlaypanel';
 import Paginator from 'primevue/paginator';
 import Panel from 'primevue/panel';
 import PanelMenu from 'primevue/panelmenu';
@@ -79,7 +79,7 @@ import ScrollPanel from 'primevue/scrollpanel';
 import ScrollTop from 'primevue/scrolltop';
 import Skeleton from 'primevue/skeleton';
 import Slider from 'primevue/slider';
-import Drawer from 'primevue/drawer';
+import Sidebar from 'primevue/sidebar';
 import SpeedDial from 'primevue/speeddial';
 import SplitButton from 'primevue/splitbutton';
 import Splitter from 'primevue/splitter';
@@ -103,8 +103,6 @@ import Tree from 'primevue/tree';
 import TreeSelect from 'primevue/treeselect';
 import TreeTable from 'primevue/treetable';
 import VirtualScroller from 'primevue/virtualscroller';
-import Aura from '@primevue/themes/Aura';
-import { definePreset } from '@primevue/themes';
 import { locale } from './locale';
 
 import BlockViewer from '@/components/BlockViewer.vue';
@@ -112,35 +110,11 @@ import BlockViewer from '@/components/BlockViewer.vue';
 import '@/assets/styles.scss';
 
 const app = createApp(App);
-const MyPreset = definePreset(Aura, {
-    semantic: {
-        primary: {
-            50: '{blue.50}',
-            100: '{blue.100}',
-            200: '{blue.200}',
-            300: '{blue.300}',
-            400: '{blue.400}',
-            500: '{blue.500}',
-            600: '{blue.600}',
-            700: '{blue.700}',
-            800: '{blue.800}',
-            900: '{blue.900}',
-            950: '{blue.950}'
-        }
-    }
-});
 app.use(router);
 
 app.use(PrimeVue, {
     locale: locale,
-    ripple: true,
-    prefix: 'p',
-    theme: {
-        preset: MyPreset,
-        options: {
-            cssLayer: false
-        }
-    }
+    ripple: true
 });
 
 app.use(ToastService);
@@ -164,7 +138,7 @@ app.component('BlockUI', BlockUI);
 app.component('Breadcrumb', Breadcrumb);
 app.component('Button', Button);
 app.component('ButtonGroup', ButtonGroup);
-app.component('DatePicker', DatePicker);
+app.component('Calendar', Calendar);
 app.component('Card', Card);
 app.component('Chart', Chart);
 app.component('Carousel', Carousel);
@@ -184,7 +158,7 @@ app.component('DeferredContent', DeferredContent);
 app.component('Dialog', Dialog);
 app.component('Divider', Divider);
 app.component('Dock', Dock);
-app.component('Select', Select);
+app.component('Dropdown', Dropdown);
 app.component('DynamicDialog', DynamicDialog);
 app.component('Fieldset', Fieldset);
 app.component('FileUpload', FileUpload);
@@ -199,7 +173,7 @@ app.component('InputGroupAddon', InputGroupAddon);
 app.component('InputIcon', InputIcon);
 app.component('InputMask', InputMask);
 app.component('InputNumber', InputNumber);
-app.component('ToggleSwitch', ToggleSwitch);
+app.component('InputSwitch', InputSwitch);
 app.component('InputText', InputText);
 app.component('Knob', Knob);
 app.component('Listbox', Listbox);
@@ -210,7 +184,7 @@ app.component('Message', Message);
 app.component('MultiSelect', MultiSelect);
 app.component('OrderList', OrderList);
 app.component('OrganizationChart', OrganizationChart);
-app.component('PopOver', PopOver);
+app.component('OverlayPanel', OverlayPanel);
 app.component('Paginator', Paginator);
 app.component('Panel', Panel);
 app.component('PanelMenu', PanelMenu);
@@ -225,7 +199,7 @@ app.component('SelectButton', SelectButton);
 app.component('ScrollPanel', ScrollPanel);
 app.component('ScrollTop', ScrollTop);
 app.component('Slider', Slider);
-app.component('Drawer', Drawer);
+app.component('Sidebar', Sidebar);
 app.component('Skeleton', Skeleton);
 app.component('SpeedDial', SpeedDial);
 app.component('SplitButton', SplitButton);

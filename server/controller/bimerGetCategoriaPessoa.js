@@ -1,17 +1,19 @@
 import { instanceBimer } from '../config/axiosBimer.js';
 
-export const byPassBimerController = async (req, res) => {
+export const getAllCaracteristicasPessoasBimer = async (req, res) => {
     try {
         const options = {
             method: req.method,
             url: req.url,
             headers: {
                 Authorization: req.headers.Authorization
-            },
-            data: req.body
+            }
         };
+        console.log(options)
         const resposta = await instanceBimer(options);
-        res.json({ resposta: resposta.data, tokenBimer: req.headers.Authorization });
+
+        const resultado = resposta.ListaObjetos.map(({ Identificador, Nome }) => ({ Identificador, Nome }));
+        res.json({ resultado });
     } catch (error) {
         if (error.response.data) {
             res.status(400).json(error.response.data);

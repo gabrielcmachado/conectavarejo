@@ -32,7 +32,7 @@ const newAccount = async (req, res) => {
                     name: req.body.user.name,
                     email: req.body.user.email,
                     password: bcrypt.hashSync(req.body.user.password, 8),
-                    roleId: 1,
+                    roleId: '{"role":["ferramentas"]}',
                     status: 'TRIAL'
                 }
             }
@@ -81,4 +81,16 @@ const registerNewUser = async (req, res) => {
         });
 };
 
-export { registerNewUser, newAccount };
+const getRoleUserById = async (req, res, next) => {
+    const user = await User.findOne({
+        where: { uuid: req.params.uuid }
+    })
+        .then((user) => {
+            res.status(200).send(user.roleId);
+        })
+        .catch((error) => {
+            res.status(400).send({ message: error.message });
+        });
+};
+
+export { registerNewUser, newAccount, getRoleUserById };

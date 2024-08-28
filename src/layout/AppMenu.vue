@@ -1,14 +1,28 @@
 <script setup>
-import { ref } from 'vue';
-
+import { ref, watch, onMounted } from 'vue';
 import AppMenuItem from './AppMenuItem.vue';
+import { instanceLocalServer } from '../service/axios';
+
+const roles = JSON.parse(localStorage.getItem("session"));
+
+const userRoles = async () => {
+    try {
+        const response = await instanceLocalServer.get(`/user/role/${roles.uuid}`);
+        return response.data.role;
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
+};
 
 const model = ref([
     {
         label: 'Integrações',
+        role: ["integracoes"],
         items: [
             {
                 label: 'Bimer',
+                role: ["integracoes_bimer"],
                 items: [
                     {
                         label: 'Cadastro de Cliente',
@@ -26,189 +40,93 @@ const model = ref([
     },
     {
         label: 'Configurações',
+        role: ["configuracoes"],
         items: [
             {
                 label: 'Usuários',
+                role: ["configuracoes_usuarios"],
                 items: [
                     {
                         label: 'Cadastro de Usuários',
                         icon: 'pi pi-fw pi-user',
-                        to: '/painel/bimer/cadastro-pessoa'
+                        to: '/painel/configs-gerais/usuarios'
                     }
                 ]
             }
         ]
+    },
+    {
+        label: 'Ferramentas',
+        role: ["ferramentas"],
+        items: [
+            {
+                label: 'Redimensionar Imagens',
+                icon: 'pi pi-fw pi-arrow-up-right-and-arrow-down-left-from-center',
+                to: '/painel/ferramentas/redimensiona-imagem'
+            }
+        ]
     }
-
-    // {
-    //     label: 'Home',
-    //     items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
-    // },
-    // {
-    //     label: 'UI Components',
-    //     items: [
-    //         { label: 'Form Layout', icon: 'pi pi-fw pi-id-card', to: '/uikit/formlayout' },
-    //         { label: 'Input', icon: 'pi pi-fw pi-check-square', to: '/uikit/input' },
-    //         { label: 'Float Label', icon: 'pi pi-fw pi-bookmark', to: '/uikit/floatlabel' },
-    //         { label: 'Invalid State', icon: 'pi pi-fw pi-exclamation-circle', to: '/uikit/invalidstate' },
-    //         { label: 'Button', icon: 'pi pi-fw pi-mobile', to: '/uikit/button', class: 'rotated-icon' },
-    //         { label: 'Table', icon: 'pi pi-fw pi-table', to: '/uikit/table' },
-    //         { label: 'List', icon: 'pi pi-fw pi-list', to: '/uikit/list' },
-    //         { label: 'Tree', icon: 'pi pi-fw pi-share-alt', to: '/uikit/tree' },
-    //         { label: 'Panel', icon: 'pi pi-fw pi-tablet', to: '/uikit/panel' },
-    //         { label: 'Overlay', icon: 'pi pi-fw pi-clone', to: '/uikit/overlay' },
-    //         { label: 'Media', icon: 'pi pi-fw pi-image', to: '/uikit/media' },
-    //         { label: 'Menu', icon: 'pi pi-fw pi-bars', to: '/uikit/menu', preventExact: true },
-    //         { label: 'Message', icon: 'pi pi-fw pi-comment', to: '/uikit/message' },
-    //         { label: 'File', icon: 'pi pi-fw pi-file', to: '/uikit/file' },
-    //         { label: 'Chart', icon: 'pi pi-fw pi-chart-bar', to: '/uikit/charts' },
-    //         { label: 'Misc', icon: 'pi pi-fw pi-circle', to: '/uikit/misc' }
-    //     ]
-    // },
-    // {
-    //     label: 'Prime Blocks',
-    //     items: [
-    //         { label: 'Free Blocks', icon: 'pi pi-fw pi-eye', to: '/blocks', badge: 'NEW' },
-    //         { label: 'All Blocks', icon: 'pi pi-fw pi-globe', url: 'https://www.primefaces.org/primeblocks-vue', target: '_blank' }
-    //     ]
-    // },
-    // {
-    //     label: 'Utilities',
-    //     items: [
-    //         { label: 'PrimeIcons', icon: 'pi pi-fw pi-prime', to: '/utilities/icons' },
-    //         { label: 'PrimeFlex', icon: 'pi pi-fw pi-desktop', url: 'https://www.primefaces.org/primeflex/', target: '_blank' }
-    //     ]
-    // },
-    // {
-    //     label: 'Pages',
-    //     icon: 'pi pi-fw pi-briefcase',
-    //     to: '/pages',
-    //     items: [
-    //         {
-    //             label: 'Landing',
-    //             icon: 'pi pi-fw pi-globe',
-    //             to: '/landing'
-    //         },
-    //         {
-    //             label: 'Auth',
-    //             icon: 'pi pi-fw pi-user',
-    //             items: [
-    //                 {
-    //                     label: 'Login',
-    //                     icon: 'pi pi-fw pi-sign-in',
-    //                     to: '/auth/login'
-    //                 },
-    //                 {
-    //                     label: 'Error',
-    //                     icon: 'pi pi-fw pi-times-circle',
-    //                     to: '/auth/error'
-    //                 },
-    //                 {
-    //                     label: 'Access Denied',
-    //                     icon: 'pi pi-fw pi-lock',
-    //                     to: '/auth/access'
-    //                 }
-    //             ]
-    //         },
-    //         {
-    //             label: 'Crud',
-    //             icon: 'pi pi-fw pi-pencil',
-    //             to: '/pages/crud'
-    //         },
-    //         {
-    //             label: 'Timeline',
-    //             icon: 'pi pi-fw pi-calendar',
-    //             to: '/pages/timeline'
-    //         },
-    //         {
-    //             label: 'Not Found',
-    //             icon: 'pi pi-fw pi-exclamation-circle',
-    //             to: '/pages/notfound'
-    //         },
-    //         {
-    //             label: 'Empty',
-    //             icon: 'pi pi-fw pi-circle-off',
-    //             to: '/pages/empty'
-    //         }
-    //     ]
-    // },
-    // {
-    //     label: 'Hierarchy',
-    //     items: [
-    //         {
-    //             label: 'Submenu 1',
-    //             icon: 'pi pi-fw pi-bookmark',
-    //             items: [
-    //                 {
-    //                     label: 'Submenu 1.1',
-    //                     icon: 'pi pi-fw pi-bookmark',
-    //                     items: [
-    //                         { label: 'Submenu 1.1.1', icon: 'pi pi-fw pi-bookmark' },
-    //                         { label: 'Submenu 1.1.2', icon: 'pi pi-fw pi-bookmark' },
-    //                         { label: 'Submenu 1.1.3', icon: 'pi pi-fw pi-bookmark' }
-    //                     ]
-    //                 },
-    //                 {
-    //                     label: 'Submenu 1.2',
-    //                     icon: 'pi pi-fw pi-bookmark',
-    //                     items: [{ label: 'Submenu 1.2.1', icon: 'pi pi-fw pi-bookmark' }]
-    //                 }
-    //             ]
-    //         },
-    //         {
-    //             label: 'Submenu 2',
-    //             icon: 'pi pi-fw pi-bookmark',
-    //             items: [
-    //                 {
-    //                     label: 'Submenu 2.1',
-    //                     icon: 'pi pi-fw pi-bookmark',
-    //                     items: [
-    //                         { label: 'Submenu 2.1.1', icon: 'pi pi-fw pi-bookmark' },
-    //                         { label: 'Submenu 2.1.2', icon: 'pi pi-fw pi-bookmark' }
-    //                     ]
-    //                 },
-    //                 {
-    //                     label: 'Submenu 2.2',
-    //                     icon: 'pi pi-fw pi-bookmark',
-    //                     items: [{ label: 'Submenu 2.2.1', icon: 'pi pi-fw pi-bookmark' }]
-    //                 }
-    //             ]
-    //         }
-    //     ]
-    // },
-    // {
-    //     label: 'Get Started',
-    //     items: [
-    //         {
-    //             label: 'Documentation',
-    //             icon: 'pi pi-fw pi-question',
-    //             to: '/documentation'
-    //         },
-    //         {
-    //             label: 'Figma',
-    //             url: 'https://www.dropbox.com/scl/fi/bhfwymnk8wu0g5530ceas/sakai-2023.fig?rlkey=u0c8n6xgn44db9t4zkd1brr3l&dl=0',
-    //             icon: 'pi pi-fw pi-pencil',
-    //             target: '_blank'
-    //         },
-    //         {
-    //             label: 'View Source',
-    //             icon: 'pi pi-fw pi-search',
-    //             url: 'https://github.com/primefaces/sakai-vue',
-    //             target: '_blank'
-    //         },
-    //         {
-    //             label: 'Nuxt Version',
-    //             url: 'https://github.com/primefaces/sakai-nuxt',
-    //             icon: 'pi pi-fw pi-star'
-    //         }
-    //     ]
-    // }
 ]);
+
+const toArray = (value) => {
+    console.log(`Converting to array: ${value}`);
+    return Array.isArray(value) ? value : [value];
+};
+
+const filterModel = (items, userRolesArray, parentRoles = []) => {
+    console.log(`Filtering items with parent roles: ${parentRoles}`);
+    return items.reduce((filtered, item) => {
+        // Garantir que item.role é um array
+        const itemRoles = toArray(item.role);
+        console.log(`Item roles: ${itemRoles}`);
+        
+        // Combinar roles do pai com os roles do item
+        const rolesToCheck = parentRoles.concat(itemRoles);
+        console.log(`Roles to check: ${rolesToCheck}`);
+        
+        // Verificar se pelo menos um role do item está em userRoles
+        const hasAccess = rolesToCheck.some(role => userRolesArray.includes(role));
+        console.log(`Has access: ${hasAccess} (Roles to check: ${rolesToCheck}, User roles: ${userRolesArray})`);
+        
+        if (hasAccess) {
+            const filteredItem = { ...item };
+            console.log(`Filtered item: ${JSON.stringify(filteredItem)}`);
+            
+            if (filteredItem.items) {
+                filteredItem.items = filterModel(filteredItem.items, userRolesArray, rolesToCheck);
+            }
+            
+            filtered.push(filteredItem); // Aqui estamos adicionando itens ao array filtered
+        }
+
+        return filtered;
+    }, []); // Inicializar 'filtered' como um array vazio
+};
+
+const initialize = async () => {
+    const userRolesArray = await userRoles();
+    console.log(`User roles: ${userRolesArray}`);
+
+    const filteredModelValue = filterModel(model.value, userRolesArray);
+    console.log(`Filtered model: ${JSON.stringify(filteredModelValue)}`);
+
+    filteredModel.value = filteredModelValue;
+};
+
+const filteredModel = ref([]);
+
+onMounted(() => {
+    initialize();
+});
+
+watch(filteredModel, (newVal) => {
+    console.log('Filtered model updated:', newVal);
+});
 </script>
 
 <template>
     <ul class="layout-menu">
-        <template v-for="(item, i) in model" :key="item">
+        <template v-for="(item, i) in filteredModel" :key="i">
             <app-menu-item v-if="!item.separator" :item="item" :index="i"></app-menu-item>
             <li v-if="item.separator" class="menu-separator"></li>
         </template>

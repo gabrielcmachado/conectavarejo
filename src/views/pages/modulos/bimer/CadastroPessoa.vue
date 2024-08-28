@@ -45,6 +45,7 @@ const showMessage = (severity, summary, detail) => {
 };
 
 const verificarCadastro = async () => {
+    showMessageTime('info', 'Aguarde', 'Localizando Aguarde', 1500);
     if (localStorage.getItem('bimer_token')) {
         instanceLocalServer.defaults.headers.Authorization = localStorage.getItem('bimer_token');
     }
@@ -52,7 +53,7 @@ const verificarCadastro = async () => {
     try {
         const response = await instanceLocalServer.get(`bimer/api/pessoas?cpfCnpj=${cpf.value.replace(/\D/g, '')}`);
         localStorage.setItem('bimer_token', response.data.tokenBimer.split(' ')[1]);
-        showMessageTime('info', 'Aguarde', 'Localizando Aguarde', 1500);
+
         if (response.data.resposta.ListaObjetos) {
             showMessageTime('info', 'Pessoa já Cadastrada', `A pessoa ${response.data.resposta.ListaObjetos[0].Nome} já está cadastrada com o código: ${response.data.resposta.ListaObjetos[0].Codigo}`, 5000);
             isCadastrado.value = true;
@@ -195,16 +196,14 @@ watchEffect(() => {
         <div class="p-fluid mt-3">
             <form @submit.prevent="submitForm" class="flex flex-wrap">
                 <div class="field col-12 md:col-6">
-                    <div class="p-inputgroup">
+                    <InputGroup>
                         <span class="p-float-label">
                             <InputMask v-model="cpf" aria-describedby="statusCPF" id="cpf" @keyup="validarCPF" mask="999.999.999-99" required />
                             <label for="cpf">CPF</label>
                         </span>
-                        <span class="p-buttonset">
-                            <Button v-if="cpfInvalido" disabled icon="pi pi-check" type="button" @click="verificarCadastro" label="Verificar" />
-                            <Button v-else icon="pi pi-check" type="button" @click="verificarCadastro" label="Verificar" />
-                        </span>
-                    </div>
+                            <Button style="padding-right:10px; width:150px;" v-if="cpfInvalido" disabled icon="pi pi-check" type="button" @click="verificarCadastro" label="Verificar" />
+                            <Button style="padding-right:10px;width:150px;" v-else icon="pi pi-check" type="button" @click="verificarCadastro" label="Verificar" />
+                    </InputGroup>
                 </div>
                 <div class="field col-12 md:col-6">
                     <div class="p-inputgroup">
@@ -217,7 +216,7 @@ watchEffect(() => {
                         </span>
                     </div>
                 </div>
-                <div class="field col-12 md:col-3">
+                <div class="field col-12 md:col-4">
                     <SelectButton v-model="opcaoSelecionada" :options="opcoesConsulta" />
                 </div>
                 <div class="field col-12 md:col-4">
@@ -236,9 +235,7 @@ watchEffect(() => {
                         <span class="p-inputgroup-addon">
                             <i class="pi pi-heart-fill"></i>
                         </span>
-                        <span class="p-float-label">
-                            <Select v-model="nomeVendedor" id="nomeVendedor" optionLabel="name" :options="nomeVendedores" placeholder="Selecione um vendedor" required></Select>
-                        </span>
+                            <Dropdown v-model="nomeVendedor" id="nomeVendedor" optionLabel="name" :options="nomeVendedores" placeholder="Selecione um vendedor" required></Dropdown>
                     </div>
                 </div>
                 <div class="field col-12 md:col-12">
